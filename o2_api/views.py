@@ -1,56 +1,56 @@
-from django.shortcuts import render
-from django.http import HttpResponse
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework.renderers import JSONRenderer
-from rest_framework.parsers import JSONParser
 from o2_api.models import *
-from o2_api.serializers import UserSerializer
-# Create your views here.
-class JSONResponse(HttpResponse):
-    """
-    An HttpResponse that renders its content into JSON.
-    """
-    def __init__(self, data, **kwargs):
-        content = JSONRenderer().render(data)
-        kwargs['content_type'] = 'application/json'
-        super(JSONResponse, self).__init__(content, **kwargs)
+from o2_api.serializers import UserSerializer, GameSerializer
+from rest_framework import generics
+from django.contrib.auth.models import User
+from rest_framework import permissions
+from o2_api.permissions import IsOwnerOrReadOnly
+from django.contrib.auth import get_user_model
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
 
-@csrf_exempt
-def user_list(request, format=None):
 
-    if request.method == 'GET':
-        users = User_Game.objects.all()
-        serializer = UserSerializer(users, many=True)
-        return JSONResponse(serializer.data)
+class GameList(generics.ListCreateAPIView):
+    queryset = Game.objects.all()
+    serializer_class = GameSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly)
 
-    elif request.method == 'POST':
-        data = JSONParser().parse(request)
-        serializer = UserSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return JSONResponse(serializer.data, status=201)
-        return JSONResponse(serializer.errors, status=400)
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
 
-@csrf_exempt
-def user_detail(request, pk):
 
-    try:
-        user = User_Game.objects.get(pk=pk)
-    except User_Game.DoesNotExist:
-        return HttpResponse(status=404)
+class GameDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Game.objects.all()
+    serializer_class = GameSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly)
 
-    if request.method == 'GET':
-        serializer = UserSerializer(user)
-        return JSONResponse(serializer.data)
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
 
-    elif request.method == 'PUT':
-        data = JSONParser().parse(request)
-        serializer = UserSerializer(user, data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return JSONResponse(serializer.data)
-        return JSONResponse(serializer.errors, status=400)
 
-    elif request.method == 'DELETE':
-        user.delete()
-        return HttpResponse(status=204)
+class UserList(generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+
+class UserDetail(generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+
+class CreateUserView(generics.CreateAPIView):
+
+    model = get_user_model()
+    permissin_classes = [
+        permissions.AllowAny
+        # Or anon users can't register
+    ]
+    serializer_class = UserSerializer
+# @api_view(['POST'])
+# def create_auth(request):
+#     serialized = RegisterSerializer(data=request.data)
+#     if serialized.is_valid():
+#         serialized.save()
+#         return Response(serialized.data, status=status.HTTP_201_CREATED)
+#     else:
+#         return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
