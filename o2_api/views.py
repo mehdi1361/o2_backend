@@ -18,6 +18,12 @@ class GameList(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
+class GameUserLIst(generics.ListAPIView):
+    serializer_class = GameSerializer
+
+    def get_queryset(self):
+        username = self.kwargs['username']
+        return Game.objects.filter()
 
 class GameDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Game.objects.all()
@@ -33,7 +39,7 @@ class UserList(generics.ListAPIView):
     serializer_class = UserSerializer
 
 
-class UserDetail(generics.ListAPIView):
+class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
@@ -46,6 +52,8 @@ class CreateUserView(generics.CreateAPIView):
         # Or anon users can't register
     ]
     serializer_class = UserSerializer
+
+
 # @api_view(['POST'])
 # def create_auth(request):
 #     serialized = RegisterSerializer(data=request.data)
@@ -54,3 +62,4 @@ class CreateUserView(generics.CreateAPIView):
 #         return Response(serialized.data, status=status.HTTP_201_CREATED)
 #     else:
 #         return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
+
