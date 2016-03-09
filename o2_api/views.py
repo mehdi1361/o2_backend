@@ -1,5 +1,5 @@
 from o2_api.models import *
-from o2_api.serializers import UserSerializer, GameSerializer
+from o2_api.serializers import UserSerializer, GameSerializer, GameUserSerializer
 from rest_framework import generics
 from django.contrib.auth.models import User
 from rest_framework import permissions
@@ -53,6 +53,19 @@ class CreateUserView(generics.CreateAPIView):
     ]
     serializer_class = UserSerializer
 
+@api_view(['POST','GET'])
+def device_validation(request):
+	if request.method == 'GET':
+		devices = GameUser.objects.all()[:10]
+		serializer = GameUserSerializer(devices,many=True)
+		return Response(serializer.data)
+	if request.method == 'POST':
+		serialized = GameUserSerializer(data=request.data)
+		if serialized.is_valid():
+			serialized.save()
+			return Response(serialized.data, status=status.HTTP_201_CREATED)
+		else:
+			return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # @api_view(['POST'])
 # def create_auth(request):

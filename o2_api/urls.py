@@ -10,6 +10,7 @@ urlpatterns = [
     url(r'^users/(?P<pk>[0-9]+)/$', views.UserDetail.as_view()),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^users/register', views.CreateUserView.as_view()),
+    url(r'^users/device', views.device_validation),
 ]
 urlpatterns = format_suffix_patterns(urlpatterns)
 

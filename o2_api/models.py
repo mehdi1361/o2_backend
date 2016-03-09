@@ -14,10 +14,10 @@ class Tournament(models.Model):
 class GameUser(models.Model):
     user = models.OneToOneField('auth.User', related_name='games',null=True)
     uuid = models.CharField(max_length=100, unique=True)
-    phone_number = models.CharField(max_length=13)
-    user_verified = models.BooleanField()
+    phone_number = models.CharField(max_length=13, null=True)
+    user_verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now=True)
-    gem_quantity = models.IntegerField()
+    gem_quantity = models.IntegerField(null=True)
 
 class Game(models.Model):
     owner = models.ForeignKey(GameUser)

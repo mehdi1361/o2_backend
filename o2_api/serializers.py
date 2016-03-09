@@ -34,5 +34,9 @@ class TournamentSerializers(serializers.ModelSerializer):
         model = Tournament
         fields = ('tournament_name', 'start_date', 'end_date', 'max_user')
 
+class GameUserSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = GameUser
+		fields = ('uuid', 'phone_number', 'user_verified', 'created_at','gem_quantity')
 
 
