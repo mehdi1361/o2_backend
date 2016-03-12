@@ -12,7 +12,7 @@ class Tournament(models.Model):
         ordering = ('end_date',)
 
 class GameUser(models.Model):
-    user = models.OneToOneField('auth.User', related_name='games',null=True)
+    user = models.OneToOneField('auth.User', related_name='games', null=True)
     uuid = models.CharField(max_length=100, unique=True)
     phone_number = models.CharField(max_length=13, null=True)
     user_verified = models.BooleanField(default=False)
@@ -23,7 +23,7 @@ class Game(models.Model):
     owner = models.ForeignKey(GameUser)
     tournament = models.ForeignKey(Tournament)
     start_date = models.DateTimeField()
-    end_date = models.DateTimeField()
+    end_date = models.DateTimeField(auto_now=True)
     score = models.IntegerField()
 
     class Meta:
@@ -31,13 +31,12 @@ class Game(models.Model):
 
 class UserVerified(models.Model):
     user = models.ForeignKey(GameUser)
-    verified_code = models.CharField(max_length=50)
+    verified_code = models.CharField(max_length=50, null=True)
     created_at = models.DateTimeField(auto_now=True)
-
-class SendMessage(models.Model):
-    user = models.ForeignKey(GameUser)
     message = models.CharField(max_length=500)
-    message_status = models.CharField(max_length=5)
+    message_status = models.CharField(max_length=5, null=True)
+    verified_status = models.BooleanField(default=False)
+
 
 class BuyPackage(models.Model):
     user = models.ForeignKey(GameUser)

@@ -11,6 +11,8 @@ urlpatterns = [
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^users/register', views.CreateUserView.as_view()),
     url(r'^users/device', views.device_validation),
+    url(r'^users/send_verify_code', views.send_device_verified),
+    url(r'^users/send_verify', views.send_verfiy),
 ]
 urlpatterns = format_suffix_patterns(urlpatterns)
 

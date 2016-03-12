@@ -6,12 +6,11 @@ from o2_api.models import *
 
 owner = serializers.ReadOnlyField(source='owner.username')
 
-class UserSerializer(serializers.ModelSerializer):
 
+class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
 
     def create(self, validated_data):
-
         user = get_user_model().objects.create(
             username=validated_data['username']
         )
@@ -23,20 +22,25 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
 
-class GameSerializer(serializers.ModelSerializer):
 
+class GameSerializer(serializers.ModelSerializer):
     class Meta:
         model = Game
         fields = ('id', 'tournament', 'start_date', 'end_date', 'score')
+
 
 class TournamentSerializers(serializers.ModelSerializer):
     class Meta:
         model = Tournament
         fields = ('tournament_name', 'start_date', 'end_date', 'max_user')
 
+
 class GameUserSerializer(serializers.ModelSerializer):
-	class Meta:
-		model = GameUser
-		fields = ('uuid', 'phone_number', 'user_verified', 'created_at','gem_quantity')
+    class Meta:
+        model = GameUser
+        fields = ('id','uuid', 'phone_number', 'user_verified', 'created_at', 'gem_quantity')
 
-
+class UserVerfiedSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = UserVerified
+        fields = ('user', 'verified_code', 'created_at', 'message','message_status', 'verified_status')
