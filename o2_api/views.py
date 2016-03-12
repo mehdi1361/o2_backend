@@ -90,12 +90,13 @@ def send_device_verified(request):
 def send_verify(request):
     send_uuid = request.data['uuid']
     send_phone_number = request.data['phone']
-    device = GameUser.objects.filter(uuid=send_uuid, phone_number=send_phone_number).values_list('id', flat=True)[0]
+    device = GameUser.objects.filter(uuid=send_uuid)[0]
     if device:
-        user_verify = UserVerified(user_id=device, message='your verification Code 323', message_status='created', verified_code='323')
-        user_verify.save()
-
-        return Response({'id': '200', 'value': 'Message Send'})
+	user_verify = UserVerified(user_id=device.id, message='your verification Code 323', message_status='created', verified_code='323')
+#user_verify.save()
+	device.phone_number = send_phone_number
+	device.save()
+	return Response({'id': '200', 'value': 'Message Send'})
     else:
         return Response({'id': '400', 'value': 'device Does Not Exist'})
 

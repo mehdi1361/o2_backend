@@ -33,7 +33,7 @@ class UserVerified(models.Model):
     user = models.ForeignKey(GameUser)
     verified_code = models.CharField(max_length=50, null=True)
     created_at = models.DateTimeField(auto_now=True)
-    message = models.CharField(max_length=500)
+    message = models.CharField(max_length=500,null=True)
     message_status = models.CharField(max_length=5, null=True)
     verified_status = models.BooleanField(default=False)
 
