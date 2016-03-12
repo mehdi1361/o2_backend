@@ -1,5 +1,5 @@
 from o2_api.models import *
-from o2_api.serializers import UserSerializer, GameSerializer, GameUserSerializer,UserVerfiedSerializers
+from o2_api.serializers import UserSerializer, GameSerializer, GameUserSerializer, UserVerfiedSerializers
 from rest_framework import generics
 from django.contrib.auth.models import User
 from rest_framework import permissions
@@ -69,9 +69,9 @@ def device_validation(request):
         else:
             return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 @api_view(['POST', 'GET'])
 def send_device_verified(request):
-
     if request.method == 'GET':
         uuid = request.GET.get('uuid')
         print(uuid)
@@ -86,17 +86,19 @@ def send_device_verified(request):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 @api_view(['POST'])
 def send_verify(request):
     send_uuid = request.data['uuid']
     send_phone_number = request.data['phone']
     device = GameUser.objects.filter(uuid=send_uuid)[0]
     if device:
-	user_verify = UserVerified(user_id=device.id, message='your verification Code 323', message_status='created', verified_code='323')
-#user_verify.save()
-	device.phone_number = send_phone_number
-	device.save()
-	return Response({'id': '200', 'value': 'Message Send'})
+        user_verify = UserVerified(user_id=device.id, message='your verification Code 323', message_status='created',
+                                   verified_code='323')
+        user_verify.save()
+        device.phone_number = send_phone_number
+        device.save()
+        return Response({'id': '200', 'value': 'Message Send'})
     else:
         return Response({'id': '400', 'value': 'device Does Not Exist'})
 
