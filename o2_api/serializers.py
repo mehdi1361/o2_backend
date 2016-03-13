@@ -36,9 +36,11 @@ class TournamentSerializers(serializers.ModelSerializer):
 
 
 class GameUserSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField(read_only=True)
+
     class Meta:
         model = GameUser
-        fields = ('id','uuid', 'phone_number', 'user_verified', 'created_at', 'gem_quantity')
+        fields = ('uuid', 'phone_number', 'user_verified', 'created_at', 'gem_quantity', 'user')
 
 class UserVerfiedSerializers(serializers.ModelSerializer):
     class Meta:

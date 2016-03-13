@@ -106,6 +106,28 @@ def send_verify(request):
         return Response({'id': '400', 'value': 'device Does Not Exist'})
 
 
+@api_view(['POST'])
+def confirm_verification(request):
+    send_uuid = request.data['uuid']
+    user_name = request.data['username']
+    verification_code = request.data['code']
+    device = GameUser.objects.filter(uuid=send_uuid)[0]
+    user = User.objects.filter(username=user_name)[0]
+    if device and user:
+        verification = UserVerified.objects.filter(user=device.id).order_by('-id')[0]
+        if verification.verified_code == verification_code:
+            print("ok\n")
+            device.user = user
+            device.user_verified = True
+            device.save()
+            verification.message_status = 'delivered'
+            verification.verified_status = 'success'
+            verification.save()
+            return Response({'id': '200', 'value': 'user verified'})
+        else:
+            return Response({'id': '400', 'value': 'verification code not defined'})
+    else:
+        return Response({'id': '400', 'value': 'device or user Does Not Exist'})
 # @api_view(['POST'])
 # def create_auth(request):
 #     serialized = RegisterSerializer(data=request.data)

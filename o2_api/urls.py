@@ -13,6 +13,7 @@ urlpatterns = [
     url(r'^users/device', views.device_validation),
     url(r'^users/send_verify_code', views.send_device_verified),
     url(r'^users/send_verify', views.send_verify),
+    url(r'^users/verification', views.confirm_verification),
 ]
 urlpatterns = format_suffix_patterns(urlpatterns)
 
