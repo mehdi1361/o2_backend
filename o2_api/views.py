@@ -56,12 +56,17 @@ class CreateUserView(generics.CreateAPIView):
     serializer_class = UserSerializer
 
 
+# noinspection PyBroadException
 @api_view(['POST', 'GET'])
 def device_validation(request):
     if request.method == 'GET':
-        devices = GameUser.objects.all()[:10]
-        serializer = GameUserSerializer(devices, many=True)
-        return Response(serializer.data)
+        try:
+            send_uuid = request.data['uuid']
+            devices = GameUser.objects.filter(uuid=send_uuid)[:1]
+            serializer = GameUserSerializer(devices, many=True)
+            return Response(serializer.data)
+        except:
+            return Response({'id': '404', 'message': 'cant find device id'})
     if request.method == 'POST':
         serialized = GameUserSerializer(data=request.data)
         if serialized.is_valid():
@@ -75,7 +80,6 @@ def device_validation(request):
 def send_device_verified(request):
     if request.method == 'GET':
         uuid = request.GET.get('uuid')
-        print(uuid)
         user_verified = UserVerified.objects.filter(user=uuid).order_by('-id')[:1]
         serializer = UserVerfiedSerializers(user_verified, many=True)
         return Response(serializer.data)
@@ -116,7 +120,6 @@ def confirm_verification(request):
     if device and user:
         verification = UserVerified.objects.filter(user=device.id).order_by('-id')[0]
         if verification.verified_code == verification_code:
-            print("ok\n")
             device.user = user
             device.user_verified = True
             device.save()
