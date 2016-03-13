@@ -1,3 +1,4 @@
+import random
 from o2_api.models import *
 from o2_api.serializers import UserSerializer, GameSerializer, GameUserSerializer, UserVerfiedSerializers
 from rest_framework import generics
@@ -8,7 +9,7 @@ from django.contrib.auth import get_user_model
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-
+from o2_api.infrastructure import send_verification_code
 
 class GameList(generics.ListCreateAPIView):
     queryset = Game.objects.all()
@@ -93,14 +94,17 @@ def send_verify(request):
     send_phone_number = request.data['phone']
     device = GameUser.objects.filter(uuid=send_uuid)[0]
     if device:
+        verify_code = random.randrange(1000, 10000, 2)
         user_verify = UserVerified(user_id=device.id, message='your verification Code 323', message_status='created',
-                                   verified_code='323')
+                                   verified_code=verify_code)
+        send_verification_code(phone_number=send_phone_number, verification_code=verify_code)
         user_verify.save()
         device.phone_number = send_phone_number
         device.save()
         return Response({'id': '200', 'value': 'Message Send'})
     else:
         return Response({'id': '400', 'value': 'device Does Not Exist'})
+
 
 # @api_view(['POST'])
 # def create_auth(request):
