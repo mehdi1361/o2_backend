@@ -57,7 +57,7 @@ class CreateUserView(generics.CreateAPIView):
 
 
 # noinspection PyBroadException
-@api_view(['POST', 'GET'])
+@api_view(['POST'])
 def device_validation(request):
     if request.method == 'GET':
         try:
@@ -68,12 +68,18 @@ def device_validation(request):
         except:
             return Response({'id': '404', 'message': 'cant find device id'})
     if request.method == 'POST':
-        serialized = GameUserSerializer(data=request.data)
-        if serialized.is_valid():
-            serialized.save()
-            return Response(serialized.data, status=status.HTTP_201_CREATED)
-        else:
-            return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
+            send_uuid = request.data['uuid']
+            devices = GameUser.objects.filter(uuid=send_uuid)[:1]
+            if devices:
+                serializer = GameUserSerializer(devices, many=True)
+                return Response(serializer.data)
+            if not devices:
+                serialized = GameUserSerializer(data=request.data)
+                if serialized.is_valid():
+                    serialized.save()
+                    return Response(serialized.data, status=status.HTTP_201_CREATED)
+                else:
+                    return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST', 'GET'])
