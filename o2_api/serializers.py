@@ -24,9 +24,11 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class GameSerializer(serializers.ModelSerializer):
+    owner = serializers.StringRelatedField(read_only=True)
+
     class Meta:
         model = Game
-        fields = ('id', 'tournament', 'start_date', 'end_date', 'score')
+        fields = ('id', 'tournament', 'start_date', 'end_date', 'score', 'owner')
 
 
 class TournamentSerializers(serializers.ModelSerializer):

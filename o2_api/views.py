@@ -137,6 +137,30 @@ def confirm_verification(request):
             return Response({'id': '400', 'value': 'verification code not defined'})
     else:
         return Response({'id': '400', 'value': 'device or user Does Not Exist'})
+
+@api_view(['POST'])
+def game_score_register(request):
+    if request.method == 'POST':
+        try:
+            send_uuid = request.data['uuid']
+            tournament_id = request.data['tournament']
+            start_date = request.data['start_date']
+            score = request.data['score']
+            owner = GameUser.objects.get(uuid=send_uuid)
+            tournament = Tournament.objects.get(pk=tournament_id)
+            print(type(owner))
+            game = Game(owner=owner, tournament=tournament, start_date=start_date,score=score)
+            game.save()
+            return Response({'id': 200, 'message': 'Game saved'})
+
+        except:
+            return Response({'id': 404, 'message': 'bad request'})
+
+@api_view(['POST'])
+def game_leader_board(request):
+    tournament_id = request.data['tournament']
+
+
 # @api_view(['POST'])
 # def create_auth(request):
 #     serialized = RegisterSerializer(data=request.data)

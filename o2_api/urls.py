@@ -6,6 +6,8 @@ from django.conf.urls import include
 urlpatterns = [
     url(r'^game/$', views.GameList.as_view()),
     url(r'^game/(?P<pk>[0-9]+)/$', views.GameDetail.as_view()),
+    url(r'^game/register', views.game_score_register),
+
     url(r'^users/$', views.UserList.as_view()),
     url(r'^users/(?P<pk>[0-9]+)/$', views.UserDetail.as_view()),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
