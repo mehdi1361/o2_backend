@@ -10,6 +10,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from o2_api.infrastructure import send_verification_code
+from django.db.models import Max
 
 class GameList(generics.ListCreateAPIView):
     queryset = Game.objects.all()
@@ -159,6 +160,7 @@ def game_score_register(request):
 @api_view(['POST'])
 def game_leader_board(request):
     tournament_id = request.data['tournament']
+    leader_board = GameUser.objects.filter(game__tournament=1).annotate(gmax=Max('game__score')).values('user_id', 'game', 'gmax')
 
 
 # @api_view(['POST'])
