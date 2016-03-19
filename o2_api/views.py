@@ -1,6 +1,6 @@
 import random
 from o2_api.models import *
-from o2_api.serializers import UserSerializer, GameSerializer, GameUserSerializer, UserVerfiedSerializers
+from o2_api.serializers import UserSerializer, GameSerializer, GameUserSerializer, UserVerfiedSerializers, LeaderBoardSerializer, TournamentSerializers
 from rest_framework import generics
 from django.contrib.auth.models import User
 from rest_framework import permissions
@@ -69,6 +69,7 @@ def device_validation(request):
         except:
             return Response({'id': '404', 'message': 'cant find device id'})
     if request.method == 'POST':
+        try:
             send_uuid = request.data['uuid']
             devices = GameUser.objects.filter(uuid=send_uuid)[:1]
             if devices:
@@ -81,6 +82,8 @@ def device_validation(request):
                     return Response(serialized.data, status=status.HTTP_201_CREATED)
                 else:
                     return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
+        except:
+            return Response({'id':'500', 'message':'Error patameter'})
 
 
 @api_view(['POST', 'GET'])
@@ -101,44 +104,48 @@ def send_device_verified(request):
 
 @api_view(['POST'])
 def send_verify(request):
-    send_uuid = request.data['uuid']
-    send_phone_number = request.data['phone']
-    device = GameUser.objects.filter(uuid=send_uuid)[0]
-    if device:
-        verify_code = random.randrange(1000, 10000, 2)
-        user_verify = UserVerified(user_id=device.id, message='your verification Code 323', message_status='created',
-                                   verified_code=verify_code)
-        send_verification_code(phone_number=send_phone_number, verification_code=verify_code)
-        user_verify.save()
-        device.phone_number = send_phone_number
-        device.save()
-        return Response({'id': '200', 'value': 'Message Send'})
-    else:
+    try:
+        send_uuid = request.data['uuid']
+        send_phone_number = request.data['phone']
+        device = GameUser.objects.filter(uuid=send_uuid)[0]
+        if device:
+            verify_code = random.randrange(1000, 10000, 2)
+            user_verify = UserVerified(user_id=device.id, message='your verification Code 323', message_status='created',
+                                       verified_code=verify_code)
+            send_verification_code(phone_number=send_phone_number, verification_code=verify_code)
+            user_verify.save()
+            device.phone_number = send_phone_number
+            device.save()
+            return Response({'id': '200', 'value': 'Message Send'})
+        else:
+            return Response({'id': '400', 'value': 'device Does Not Exist'})
+    except:
         return Response({'id': '400', 'value': 'device Does Not Exist'})
-
 
 @api_view(['POST'])
 def confirm_verification(request):
-    send_uuid = request.data['uuid']
-    user_name = request.data['username']
-    verification_code = request.data['code']
-    device = GameUser.objects.filter(uuid=send_uuid)[0]
-    user = User.objects.filter(username=user_name)[0]
-    if device and user:
-        verification = UserVerified.objects.filter(user=device.id).order_by('-id')[0]
-        if verification.verified_code == verification_code:
-            device.user = user
-            device.user_verified = True
-            device.save()
-            verification.message_status = 'delivered'
-            verification.verified_status = 'success'
-            verification.save()
-            return Response({'id': '200', 'value': 'user verified'})
+    try:
+        send_uuid = request.data['uuid']
+        user_name = request.data['username']
+        verification_code = request.data['code']
+        device = GameUser.objects.filter(uuid=send_uuid)[0]
+        user = User.objects.filter(username=user_name)[0]
+        if device and user:
+            verification = UserVerified.objects.filter(user=device.id).order_by('-id')[0]
+            if verification.verified_code == verification_code:
+                device.user = user
+                device.user_verified = True
+                device.save()
+                verification.message_status = 'delivered'
+                verification.verified_status = 'success'
+                verification.save()
+                return Response({'id': '200', 'value': 'user verified'})
+            else:
+                return Response({'id': '400', 'value': 'verification code not defined'})
         else:
-            return Response({'id': '400', 'value': 'verification code not defined'})
-    else:
+            return Response({'id': '400', 'value': 'device or user Does Not Exist'})
+    except:
         return Response({'id': '400', 'value': 'device or user Does Not Exist'})
-
 @api_view(['POST'])
 def game_score_register(request):
     if request.method == 'POST':
@@ -149,7 +156,6 @@ def game_score_register(request):
             score = request.data['score']
             owner = GameUser.objects.get(uuid=send_uuid)
             tournament = Tournament.objects.get(pk=tournament_id)
-            print(type(owner))
             game = Game(owner=owner, tournament=tournament, start_date=start_date,score=score)
             game.save()
             return Response({'id': 200, 'message': 'Game saved'})
@@ -159,10 +165,52 @@ def game_score_register(request):
 
 @api_view(['POST'])
 def game_leader_board(request):
-    tournament_id = request.data['tournament']
-    leader_board = GameUser.objects.filter(game__tournament=1).annotate(gmax=Max('game__score')).values('user_id', 'game', 'gmax')
+    try:
+        tournament_id = request.data['tournament']
+        leader_board = GameUser.objects.filter(game__tournament=tournament_id).annotate(gmax=Max('game__score')).order_by('-gmax').values('user__username',  'gmax')
+        serializer = LeaderBoardSerializer(leader_board,many=True)
+        return Response(serializer.data)
+    except:
+        return Response({'id':'404', 'message':'tournament not found'})
 
+@api_view(['POST'])
+def golden_tournament(request):
+    tournament = Tournament.objects.order_by('-id').exclude(id=1)[:1]
+    serializer = TournamentSerializers(tournament, many=True)
+    return Response(serializer.data)
 
+@api_view(['POST'])
+def buy_package(request):
+    try:
+        send_uuid = request.data['uuid']
+        gem = request.data['gem']
+        device = GameUser.objects.filter(uuid=send_uuid)[0]
+        if device:
+            device.gem_quantity += int(gem)
+            device.save()
+            return Response({'id': '200', 'value': 'buy gem succes'})
+        else:
+             return Response({'id': '404', 'message': 'cant find device id'})
+    except:
+         return Response({'id': '500', 'message': 'error in parameter'})
+
+@api_view(['POST'])
+def use_gem(request):
+    try:
+        send_uuid = request.data['uuid']
+        gem = request.data['gem']
+        device = GameUser.objects.filter(uuid=send_uuid)[0]
+        if device:
+            if device.gem_quantity > int(gem):
+                device.gem_quantity -= int(gem)
+                device.save()
+                return Response({'id': '200', 'value': 'use gem succes'})
+            else:
+                return Response({'id': '304', 'value': 'mor than gem for user'})
+        else:
+             return Response({'id': '404', 'message': 'cant find device id'})
+    except:
+         return Response({'id': '500', 'message': 'error in parameter'})
 # @api_view(['POST'])
 # def create_auth(request):
 #     serialized = RegisterSerializer(data=request.data)

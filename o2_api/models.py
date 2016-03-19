@@ -18,7 +18,7 @@ class GameUser(models.Model):
     phone_number = models.CharField(max_length=13, null=True)
     user_verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now=True)
-    gem_quantity = models.IntegerField(null=True)
+    gem_quantity = models.IntegerField(default=0)
 
     def __str__(self):
         return str(self.uuid)
@@ -47,3 +47,4 @@ class BuyPackage(models.Model):
     price = models.IntegerField()
     created_at = models.DateTimeField(auto_now=True)
     gem_quantity = models.IntegerField()
+    operator_validation = models.BooleanField(default=False)

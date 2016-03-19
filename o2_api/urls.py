@@ -7,6 +7,10 @@ urlpatterns = [
     url(r'^game/$', views.GameList.as_view()),
     url(r'^game/(?P<pk>[0-9]+)/$', views.GameDetail.as_view()),
     url(r'^game/register', views.game_score_register),
+    url(r'^game/leaderboard', views.game_leader_board),
+    url(r'^game/golden', views.golden_tournament),
+    url(r'^game/package', views.buy_package),
+    url(r'^game/use_gem', views.use_gem),
 
     url(r'^users/$', views.UserList.as_view()),
     url(r'^users/(?P<pk>[0-9]+)/$', views.UserDetail.as_view()),

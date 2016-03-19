@@ -48,3 +48,7 @@ class UserVerfiedSerializers(serializers.ModelSerializer):
     class Meta:
         model = UserVerified
         fields = ('user', 'verified_code', 'created_at', 'message','message_status', 'verified_status')
+
+class LeaderBoardSerializer(serializers.Serializer):
+    user__username = serializers.CharField(max_length=500)
+    gmax = serializers.IntegerField()
