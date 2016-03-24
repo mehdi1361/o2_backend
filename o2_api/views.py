@@ -69,7 +69,7 @@ def create_user(request):
         if devices:
             user = User.objects.filter(username=username)
             if user:
-                return Response({'id': '304', 'Msg': 'user already exist'})
+                return Response({'id': '304', 'Msg': 'UserRegisteredBefore'})
             else:
                 new_user = User(username=username, password=123456)
                 new_user.save()
