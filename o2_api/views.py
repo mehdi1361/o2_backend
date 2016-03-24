@@ -161,19 +161,22 @@ def send_verify(request):
         send_phone_number = request.data['phone']
         device = GameUser.objects.filter(uuid=send_uuid)[0]
         if device:
-            verify_code = random.randrange(1000, 10000, 2)
-            user_verify = UserVerified(user_id=device.id, message='your verification Code 323',
-                                       message_status='created',
-                                       verified_code=verify_code)
-            send_verification_code(phone_number=send_phone_number, verification_code=verify_code)
-            user_verify.save()
-            device.phone_number = send_phone_number
-            device.save()
-            return Response({'id': '200', 'Msg': 'Message Send'})
+            if device.user_verified:
+                return Response({'id': '200', 'Msg': 'AlreadyVerified'})
+            else:
+                verify_code = random.randrange(1000, 10000, 2)
+                user_verify = UserVerified(user_id=device.id, message='your verification Code 323',
+                                           message_status='created',
+                                           verified_code=verify_code)
+                send_verification_code(phone_number=send_phone_number, verification_code=verify_code)
+                user_verify.save()
+                device.phone_number = send_phone_number
+                device.save()
+                return Response({'id': '200', 'Msg': 'MessageSend'})
         else:
-            return Response({'id': '400', 'Msg': 'device Does Not Exist'})
+            return Response({'id': '400', 'Msg': 'DeviceDoesNotExist'})
     except:
-        return Response({'id': '400', 'Msg': 'device Does Not Exist'})
+        return Response({'id': '500', 'Msg': 'ErrorParameter'})
 
 
 @api_view(['POST'])
