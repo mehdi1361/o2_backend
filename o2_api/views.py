@@ -60,6 +60,26 @@ class CreateUserView(generics.CreateAPIView):
     serializer_class = UserSerializer
 
 
+@api_view(['POST'])
+def create_user(request):
+    try:
+        send_uuid = request.data['uuid']
+        username = request.data['username']
+        devices = GameUser.objects.filter(uuid=send_uuid)[0]
+        if devices:
+            user = User.objects.filter(username=username)
+            if user:
+                return Response({'id': '304', 'Msg': 'user already exist'})
+            else:
+                new_user = User(username=username, password=123456)
+                new_user.save()
+                devices.user = new_user
+                devices.save()
+                return Response({'id': '304', 'Msg': 'user Created'})
+        else:
+            return Response({'id': '404', 'Msg': 'device not found'})
+    except:
+            return Response({'id': '500', 'Msg': 'Parameter Error'})
 # noinspection PyBroadException
 @api_view(['POST'])
 def device_validation(request):
@@ -70,9 +90,9 @@ def device_validation(request):
             serializer = GameUserSerializer(devices, many=True)
             return Response(serializer.data)
         except:
-            return Response({'id': '404', 'msg': 'cant find device id'})
+            return Response({'id': '404', 'Msg': 'cant find device id'})
     if request.method == 'POST':
-        # try:
+        try:
             now = datetime.now(timezone.utc)
             tournament = Tournament.objects.filter(end_date__gte=now).order_by('-id').exclude(id=1)[:1]
             send_uuid = request.data['uuid']
@@ -114,8 +134,8 @@ def device_validation(request):
                     return Response(serialized.data, status=status.HTTP_201_CREATED)
                 else:
                     return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
-        # except:
-        #     return Response({'id': '500', 'message': 'Error patameter'})
+        except:
+            return Response({'id': '500', 'Msg': 'Error patameter'})
 
 
 @api_view(['POST', 'GET'])
@@ -149,11 +169,11 @@ def send_verify(request):
             user_verify.save()
             device.phone_number = send_phone_number
             device.save()
-            return Response({'id': '200', 'value': 'Message Send'})
+            return Response({'id': '200', 'Msg': 'Message Send'})
         else:
-            return Response({'id': '400', 'value': 'device Does Not Exist'})
+            return Response({'id': '400', 'Msg': 'device Does Not Exist'})
     except:
-        return Response({'id': '400', 'value': 'device Does Not Exist'})
+        return Response({'id': '400', 'Msg': 'device Does Not Exist'})
 
 
 @api_view(['POST'])
@@ -173,13 +193,13 @@ def confirm_verification(request):
                 verification.message_status = 'delivered'
                 verification.verified_status = 'success'
                 verification.save()
-                return Response({'id': '200', 'value': 'user verified'})
+                return Response({'id': '200', 'Msg': 'user verified'})
             else:
-                return Response({'id': '400', 'value': 'verification code not defined'})
+                return Response({'id': '400', 'Msg': 'verification code not defined'})
         else:
-            return Response({'id': '400', 'value': 'device or user Does Not Exist'})
+            return Response({'id': '400', 'Msg': 'device or user Does Not Exist'})
     except:
-        return Response({'id': '400', 'value': 'device or user Does Not Exist'})
+        return Response({'id': '400', 'Msg': 'device or user Does Not Exist'})
 
 
 @api_view(['POST'])
@@ -194,10 +214,10 @@ def game_score_register(request):
             tournament = Tournament.objects.get(pk=tournament_id)
             game = Game(owner=owner, tournament=tournament, start_date=start_date, score=score)
             game.save()
-            return Response({'id': 200, 'message': 'Game saved'})
+            return Response({'id': 200, 'Msg': 'Game saved'})
 
         except:
-            return Response({'id': 404, 'message': 'bad request'})
+            return Response({'id': 404, 'Msg': 'bad request'})
 
 
 @api_view(['POST'])
@@ -209,7 +229,7 @@ def game_leader_board(request):
         serializer = LeaderBoardSerializer(leader_board, many=True)
         return Response(serializer.data)
     except:
-        return Response({'id': '404', 'message': 'tournament not found'})
+        return Response({'id': '404', 'Msg': 'tournament not found'})
 
 
 @api_view(['POST'])
@@ -228,11 +248,11 @@ def buy_package(request):
         if device:
             device.gem_quantity += int(gem)
             device.save()
-            return Response({'id': '200', 'value': 'buy gem succes'})
+            return Response({'id': '200', 'Msg': 'buy gem succes'})
         else:
-            return Response({'id': '404', 'message': 'cant find device id'})
+            return Response({'id': '404', 'Msg': 'cant find device id'})
     except:
-        return Response({'id': '500', 'message': 'error in parameter'})
+        return Response({'id': '500', 'Msg': 'error in parameter'})
 
 
 @api_view(['POST'])
@@ -245,13 +265,13 @@ def use_gem(request):
             if device.gem_quantity > int(gem):
                 device.gem_quantity -= int(gem)
                 device.save()
-                return Response({'id': '200', 'value': 'use gem succes'})
+                return Response({'id': '200', 'Msg': 'use gem succes'})
             else:
-                return Response({'id': '304', 'value': 'mor than gem for user'})
+                return Response({'id': '304', 'Msg': 'mor than gem for user'})
         else:
-            return Response({'id': '404', 'message': 'cant find device id'})
+            return Response({'id': '404', 'Msg': 'cant find device id'})
     except:
-        return Response({'id': '500', 'message': 'error in parameter'})
+        return Response({'id': '500', 'Msg': 'error in parameter'})
 
 # @api_view(['POST'])
 # def create_auth(request):
