@@ -78,22 +78,24 @@ def device_validation(request):
             send_uuid = request.data['uuid']
             devices = GameUser.objects.filter(uuid=send_uuid)
             if devices:
+                user = None if not devices[0].user else devices[0].user.username
+                print(user)
                 if tournament:
                     result_dict = {'uuid': devices[0].uuid,
-                                   'username': devices[0].user.username,
-                                   'is_verified': devices[0].user_verified,
+                                   'UserName': user,
+                                   'IsVerified': devices[0].user_verified,
                                    'Gem': devices[0].gem_quantity,
                                    'MobileNumber': devices[0].phone_number,
                                    'IsGoldenTimeAvailable': True,
                                    'GoldenTimeStart': (tournament[0].start_date - now).total_seconds(),
                                    'GoldenTimeEnd': (tournament[0].end_date - now).total_seconds(),
                                    'GoldenTimeId': tournament[0].id,
-                                   'msg': 'ok'
+                                   'Msg': 'ok'
                                    }
                     return Response(result_dict)
                 else:
                     result_dict = {'uuid': devices[0].uuid,
-                                   'username': devices[0].user.username,
+                                   'username': user,
                                    'is_verified': devices[0].user_verified,
                                    'Gem': devices[0].gem_quantity,
                                    'MobileNumber': devices[0].phone_number,
