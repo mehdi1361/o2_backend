@@ -1,7 +1,7 @@
 import random
 from o2_api.models import *
 from o2_api.serializers import UserSerializer, GameSerializer, GameUserSerializer, UserVerfiedSerializers, \
-    LeaderBoardSerializer, TournamentSerializers,PackageSerializer
+    LeaderBoardSerializer, TournamentSerializers, PackageSerializer
 from rest_framework import generics
 from django.contrib.auth.models import User
 from rest_framework import permissions
@@ -79,7 +79,9 @@ def create_user(request):
         else:
             return Response({'id': '404', 'Msg': 'device not found'})
     except:
-            return Response({'id': '500', 'Msg': 'Parameter Error'})
+        return Response({'id': '500', 'Msg': 'Parameter Error'})
+
+
 # noinspection PyBroadException
 @api_view(['POST'])
 def device_validation(request):
@@ -130,7 +132,33 @@ def device_validation(request):
                 serialized = GameUserSerializer(data=request.data)
                 if serialized.is_valid():
                     serialized.save()
-                    return Response(serialized.data, status=status.HTTP_201_CREATED)
+                    new_devices = GameUser.objects.filter(uuid=send_uuid)
+                    if tournament:
+                        result_dict = {'uuid': new_devices[0].uuid,
+                                       'UserName': None,
+                                       'IsVerified': new_devices[0].user_verified,
+                                       'Gem': new_devices[0].gem_quantity,
+                                       'MobileNumber': new_devices[0].phone_number,
+                                       'IsGoldenTimeAvailable': True,
+                                       'GoldenTimeStart': (tournament[0].start_date - now).total_seconds(),
+                                       'GoldenTimeEnd': (tournament[0].end_date - now).total_seconds(),
+                                       'GoldenTimeId': tournament[0].id,
+                                       'Msg': 'ok'
+                                       }
+                        return Response(result_dict)
+                    else:
+                        result_dict = {'uuid': new_devices[0].uuid,
+                                       'username': None,
+                                       'is_verified': new_devices[0].user_verified,
+                                       'Gem': new_devices[0].gem_quantity,
+                                       'MobileNumber': new_devices[0].phone_number,
+                                       'IsGoldenTimeAvailable': False,
+                                       'GoldenTimeStart': None,
+                                       'GoldenTimeEnd': None,
+                                       'GoldenTimeId': None,
+                                       'msg': 'ok'
+                                       }
+                        return Response(result_dict)
                 else:
                     return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
         except:
@@ -221,23 +249,23 @@ def game_score_register(request):
 @api_view(['POST'])
 def game_leader_board(request):
     # try:
-        tournament_id = request.data['tournament']
-        send_uuid = request.data['uuid']
-        tournament = Tournament.objects.get(pk=tournament_id)
-        leader_board = GameUser.objects.filter(game__tournament=tournament_id).annotate(
-            gmax=Max('game__score')).order_by('-gmax').values('user__username', 'gmax','uuid')
-        r_value = []
-        for index, le in enumerate(leader_board[:20]):
-            t_dict = {'user': le['user__username'], 'score': le['gmax'],'position': index + 1}
-            r_value.append(t_dict)
-        player = leader_board.filter(uuid=send_uuid).values('user__username', 'gmax')
-        print(player)
-        return Response({'golden_time_start_date': tournament.start_date, 'leader_board': r_value,
-                         'player': None if not player else player[0]['user__username'],
-                         'player_high_score': None if not player else player[0]['gmax']
-                         })
-        # serializer = LeaderBoardSerializer(leader_board, many=True)
-        # return Response(serializer.data)
+    tournament_id = request.data['tournament']
+    send_uuid = request.data['uuid']
+    tournament = Tournament.objects.get(pk=tournament_id)
+    leader_board = GameUser.objects.filter(game__tournament=tournament_id).annotate(
+        gmax=Max('game__score')).order_by('-gmax').values('user__username', 'gmax', 'uuid')
+    r_value = []
+    for index, le in enumerate(leader_board[:20]):
+        t_dict = {'user': le['user__username'], 'score': le['gmax'], 'position': index + 1}
+        r_value.append(t_dict)
+    player = leader_board.filter(uuid=send_uuid).values('user__username', 'gmax')
+    print(player)
+    return Response({'golden_time_start_date': tournament.start_date, 'leader_board': r_value,
+                     'player': None if not player else player[0]['user__username'],
+                     'player_high_score': None if not player else player[0]['gmax']
+                     })
+    # serializer = LeaderBoardSerializer(leader_board, many=True)
+    # return Response(serializer.data)
     # except:
     #     return Response({'id': '404', 'Msg': 'tournament not found'})
 
@@ -283,6 +311,7 @@ def use_gem(request):
             return Response({'id': '404', 'Msg': 'cant find device id'})
     except:
         return Response({'id': '500', 'Msg': 'error in parameter'})
+
 
 @api_view(['POST'])
 def package_list(request):
