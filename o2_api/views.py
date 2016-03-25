@@ -240,7 +240,7 @@ def game_score_register(request):
             tournament = Tournament.objects.get(pk=tournament_id)
             game = Game(owner=owner, tournament=tournament, start_date=datetime.now(timezone.utc), score=score)
             game.save()
-            return Response({'id': 200, 'Msg': 'Game saved'})
+            return Response({'id': 200, 'Msg': 'ok'})
 
         except:
             return Response({'id': 404, 'Msg': 'bad request'})
@@ -248,26 +248,27 @@ def game_score_register(request):
 
 @api_view(['POST'])
 def game_leader_board(request):
-    # try:
-    tournament_id = request.data['tournament']
-    send_uuid = request.data['uuid']
-    tournament = Tournament.objects.get(pk=tournament_id)
-    leader_board = GameUser.objects.filter(game__tournament=tournament_id).annotate(
-        gmax=Max('game__score')).order_by('-gmax').values('user__username', 'gmax', 'uuid')
-    r_value = []
-    for index, le in enumerate(leader_board[:20]):
-        t_dict = {'user': le['user__username'], 'score': le['gmax'], 'position': index + 1}
-        r_value.append(t_dict)
-    player = leader_board.filter(uuid=send_uuid).values('user__username', 'gmax')
-    print(player)
-    return Response({'golden_time_start_date': tournament.start_date, 'leader_board': r_value,
-                     'player': None if not player else player[0]['user__username'],
-                     'player_high_score': None if not player else player[0]['gmax']
-                     })
-    # serializer = LeaderBoardSerializer(leader_board, many=True)
-    # return Response(serializer.data)
-    # except:
-    #     return Response({'id': '404', 'Msg': 'tournament not found'})
+    try:
+        tournament_id = request.data['tournament']
+        send_uuid = request.data['uuid']
+        tournament = Tournament.objects.get(pk=tournament_id)
+        leader_board = GameUser.objects.filter(game__tournament=tournament_id).annotate(
+            gmax=Max('game__score')).order_by('-gmax').values('user__username', 'gmax', 'uuid')
+        r_value = []
+        for index, le in enumerate(leader_board[:20]):
+            t_dict = {'user': le['user__username'], 'score': le['gmax'], 'position': index + 1}
+            r_value.append(t_dict)
+        player = leader_board.filter(uuid=send_uuid).values('user__username', 'gmax')
+        print(player)
+        return Response({'golden_time_start_date': tournament.start_date, 'leader_board': r_value,
+                         'player': None if not player else player[0]['user__username'],
+                         'player_high_score': None if not player else player[0]['gmax'],
+                         'Msg': 'ok'
+                         })
+        # serializer = LeaderBoardSerializer(leader_board, many=True)
+        # return Response(serializer.data)
+    except:
+        return Response({'id': '404', 'Msg': 'tournament not found'})
 
 
 @api_view(['POST'])
