@@ -207,11 +207,10 @@ def game_score_register(request):
         try:
             send_uuid = request.data['uuid']
             tournament_id = request.data['tournament']
-            start_date = request.data['start_date']
             score = request.data['score']
             owner = GameUser.objects.get(uuid=send_uuid)
             tournament = Tournament.objects.get(pk=tournament_id)
-            game = Game(owner=owner, tournament=tournament, start_date=start_date, score=score)
+            game = Game(owner=owner, tournament=tournament, start_date=datetime.now(timezone.utc), score=score)
             game.save()
             return Response({'id': 200, 'Msg': 'Game saved'})
 
