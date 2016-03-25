@@ -11,6 +11,7 @@ urlpatterns = [
     url(r'^game/golden', views.golden_tournament),
     url(r'^game/package', views.buy_package),
     url(r'^game/use_gem', views.use_gem),
+    url(r'^game/shop', views.package_list),
 
     url(r'^users/$', views.UserList.as_view()),
     url(r'^users/(?P<pk>[0-9]+)/$', views.UserDetail.as_view()),

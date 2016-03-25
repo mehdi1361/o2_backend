@@ -41,10 +41,17 @@ class UserVerified(models.Model):
     message_status = models.CharField(max_length=5, null=True)
     verified_status = models.BooleanField(default=False)
 
+class Package(models.Model):
+    name = models.CharField(max_length=200)
+    price = models.IntegerField()
+    gem_quantity = models.IntegerField()
+    description = models.CharField(max_length=200)
 
 class BuyPackage(models.Model):
     user = models.ForeignKey(GameUser)
-    price = models.IntegerField()
+    package = models.ForeignKey(Package)
     created_at = models.DateTimeField(auto_now=True)
-    gem_quantity = models.IntegerField()
     operator_validation = models.BooleanField(default=False)
+
+
+

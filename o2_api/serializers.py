@@ -49,6 +49,12 @@ class UserVerfiedSerializers(serializers.ModelSerializer):
         model = UserVerified
         fields = ('user', 'verified_code', 'created_at', 'message','message_status', 'verified_status')
 
+class PackageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Package
+        fields = ("id", "name", "price", "gem_quantity", "description")
+
 class LeaderBoardSerializer(serializers.Serializer):
     user__username = serializers.CharField(max_length=500)
     gmax = serializers.IntegerField()
+    current_user = serializers.CharField(max_length=200)
