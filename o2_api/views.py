@@ -287,7 +287,7 @@ def buy_package(request):
             gem = Package.objects.get(pk=package)
             device.gem_quantity += int(gem.gem_quantity)
             device.save()
-            return Response({'id': '200', 'Msg': 'buy gem succes', 'Gem': device.gem_quantity})
+            return Response({'id': '200', 'Msg': 'ok', 'Gem': device.gem_quantity})
         else:
             return Response({'id': '404', 'Msg': 'cant find device id'})
     except:
@@ -301,10 +301,10 @@ def use_gem(request):
         gem = request.data['gem']
         device = GameUser.objects.filter(uuid=send_uuid)[0]
         if device:
-            if device.gem_quantity > int(gem):
+            if device.gem_quantity >= int(gem):
                 device.gem_quantity -= int(gem)
                 device.save()
-                return Response({'id': '200', 'Msg': 'use gem success', 'Gem': device.gem_quantity})
+                return Response({'id': '200', 'Msg': 'ok', 'Gem': device.gem_quantity})
             else:
                 return Response({'id': '304', 'Msg': 'mor than gem for user'})
         else:
