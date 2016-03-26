@@ -11,6 +11,9 @@ class Tournament(models.Model):
     class Meta:
         ordering = ('end_date',)
 
+    def __str__(self):
+        return self.tournament_name
+
 
 class GameUser(models.Model):
     user = models.OneToOneField('auth.User', related_name='games', null=True)
@@ -21,7 +24,7 @@ class GameUser(models.Model):
     gem_quantity = models.IntegerField(default=0)
 
     def __str__(self):
-        return str(self.uuid)
+        return str(self.user)
 
 class Game(models.Model):
     owner = models.ForeignKey(GameUser)

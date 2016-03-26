@@ -3,7 +3,7 @@ from o2_api.models import GameUser, Tournament, Game, Package,BuyPackage
 # Register your models here.
 @admin.register(GameUser)
 class GameUserAdmin(admin.ModelAdmin):
-    list_display = ["user","uuid", "phone_number","gem_quantity"]
+    list_display = ["user","uuid", "phone_number", "gem_quantity"]
 
 class GameAdmin(admin.TabularInline):
     model = Game
@@ -21,3 +21,7 @@ class PackageAdmin(admin.ModelAdmin):
     list_display = ["id", "name", "price", "gem_quantity", "description"]
     inlines = [BuyPackageAdmin]
 
+@admin.register(Game)
+class GameAdmin(admin.ModelAdmin):
+    list_display = ["owner", "tournament", "start_date", "end_date", "score"]
+    list_filter = ["tournament"]
