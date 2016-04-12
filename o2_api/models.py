@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 from django.contrib.auth.models import User
 from django.db import models
-
 class Tournament(models.Model):
     tournament_name = models.CharField(max_length=80)
     start_date = models.DateTimeField()
@@ -19,7 +18,7 @@ class GameUser(models.Model):
     user_verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now=True)
     gem_quantity = models.IntegerField(default=0)
-
+    #TODO TEST to do in test
     def __str__(self):
         return str(self.uuid)
 
@@ -52,6 +51,3 @@ class BuyPackage(models.Model):
     package = models.ForeignKey(Package)
     created_at = models.DateTimeField(auto_now=True)
     operator_validation = models.BooleanField(default=False)
-
-
-
